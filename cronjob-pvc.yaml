@@ -46,11 +46,18 @@ spec:
                 path: /var/lib/etcd/
                 type: Directory
               name: etcd-data
-            - hostPath:
-                path: /etcd-backup/
-                type: DirectoryOrCreate
+            - persistentVolumeClaim:
+                claimName: etcd-backup
               name: etcd-backup
             - hostPath:
                 path: /etc/localtime
                 type: File
               name: host-time
+             
+
+                    volumeMounts:
+      - mountPath: "/var/www/html"
+        name: mypd
+  volumes:
+    - name: mypd
+      persistentVolumeClaim:

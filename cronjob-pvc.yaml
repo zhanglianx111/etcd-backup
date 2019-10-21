@@ -53,11 +53,3 @@ spec:
                 path: /etc/localtime
                 type: File
               name: host-time
-             
-
-                    volumeMounts:
-      - mountPath: "/var/www/html"
-        name: mypd
-  volumes:
-    - name: mypd
-      persistentVolumeClaim:

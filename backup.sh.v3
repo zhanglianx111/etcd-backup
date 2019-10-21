@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+
+Backup_pre="backup-etcd"
+Etcd_data_dir="/var/lib/etcd"
+Date_time=`date +%Y-%m-%d-%H-%M`
+Backup_filename="snapshot.db"
+#Backup_filename=${Backup_dir}/${Backup_pre}-${Date_time}
+Backup_root="/etcd-backup"
+Backup_dir=${Backup_root}/${Backup_pre}-${Date_time}
+
+# backup etcd data
+mkdir -p ${Backup_dir}
+ETCDCTL_API=3 /usr/bin/etcdctl  --endpoints=127.0.0.1:2379 \
+	--cert /etc/etcd/ssl/etcd.pem  \
+       	--key /etc/etcd/ssl/etcd-key.pem \
+      	--cacert /etc/etcd/ssl/ca.pem \
+	snapshot save ${Backup_dir}/${Backup_filename}
+
+if [ $? -ne 0 ];then
+  echo "backup etcd failed at " ${Date_time}
+fi
+
+# tar etcd date
+tar cvzf ${Backup_root}/${Backup_pre}-${Date_time}.tar.gz ${Backup_dir}
+if [ $? -ne 0 ];then
+  echo "tar etcd data failed at " ${Date_time}
+fi
+rm -fr ${Backup_dir}
+
+# save 3 backups
+find ${Backup_root}/*.gz  -mmin +360 -exec rm -r {} \;
+exit 0

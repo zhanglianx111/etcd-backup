@@ -1,0 +1,47 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: etcd-backup
+spec:
+  schedule: "*/5 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: etcd-backup
+            image: harbor.aibee.cn/platform/etcd-backup:0.9
+            imagePullPolicy: IfNotPresent
+            volumeMounts:
+            - mountPath: /etc/etcd/ssl/
+              name: etcd-certs
+              readOnly: true
+            - mountPath: /var/lib/etcd/
+              name: etcd-data
+              readOnly: true
+            - mountPath: /etcd-backup
+              name: etcd-backup
+            - mountPath: /etc/localtime
+              readOnly: true
+              name: host-time
+          restartPolicy: OnFailure
+          hostNetwork: true
+          nodeSelector:
+            "manage": "true"
+          volumes:
+            - hostPath:
+                path: /etc/etcd/ssl/
+                type: Directory
+              name: etcd-certs
+            - hostPath:
+                path: /var/lib/etcd/
+                type: Directory
+              name: etcd-data
+            - hostPath:
+                path: /etcd-backup/
+                type: DirectoryOrCreate
+              name: etcd-backup
+            - hostPath:
+                path: /etc/localtime
+                type: File
+              name: host-time

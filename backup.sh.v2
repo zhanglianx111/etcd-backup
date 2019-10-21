@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+
+Backup_pre="backup-etcd"
+Etcd_data_dir="/var/lib/etcd"
+Date_time=`date +%Y-%m-%d-%H-%M`
+Backup_dir="/etcd-backup"
+Backup_filename=${Backup_dir}/${Backup_pre}-${Date_time}
+
+# backup etcd data
+/usr/bin/etcdctl --cert-file /etc/etcd/ssl/etcd.pem \
+  --key-file /etc/etcd/ssl/etcd-key.pem \
+  --ca-file /etc/etcd/ssl/ca.pem \
+  backup --data-dir ${Etcd_data_dir} --backup-dir ${Backup_filename}.bak  
+
+if [ $? -ne 0 ];then
+  echo "backup etcd failed at " ${Date_time}
+fi
+
+# tar etcd date
+tar cvzf ${Backup_filename}.tar.gz ${Backup_filename}.bak
+if [ $? -ne 0 ];then
+  echo "tar etcd data failed at " ${Date_time}
+fi
+rm -fr ${Backup_dir}/${Backup_pre}-${Date_time}.bak
+
+# save 3 backups
+find ${Backup_dir}/*.gz  -mmin +360 -exec rm -r {} \;
+exit 0

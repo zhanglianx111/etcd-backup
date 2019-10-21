@@ -1,4 +1,3 @@
-apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
   name: etcd-backup
@@ -10,7 +9,7 @@ spec:
         spec:
           containers:
           - name: etcd-backup
-            image: harbor.aibee.cn/platform/etcd-backup:0.9
+            image: harbor.aibee.cn/platform/etcd-backup:1.0
             imagePullPolicy: IfNotPresent
             volumeMounts:
             - mountPath: /etc/etcd/ssl/
@@ -25,9 +24,18 @@ spec:
               readOnly: true
               name: host-time
           restartPolicy: OnFailure
+          imagePullSecrets:
+          - name: harborkey
           hostNetwork: true
+          tolerations:
+          - effect: NoSchedule
+            operator: Exists
+          - key: CriticalAddonsOnly
+            operator: Exists
+          - effect: NoExecute
+            operator: Exists
           nodeSelector:
-            "manage": "true"
+            "kubernetes.io/role": "master"
           volumes:
             - hostPath:
                 path: /etc/etcd/ssl/

@@ -8,6 +8,16 @@ spec:
     spec:
       template:
         spec:
+          affinity:
+            nodeAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                nodeSelectorTerms:
+                - matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: In
+                    values:
+                    - cn-hangzhou.i-bp174fkewtqiwq0mum2d
+                    - cn-hangzhou.i-bp174fkewtqiwq0mum2e
           containers:
           - name: etcd-backup
             image: harbor.aibee.cn/platform/etcd-backup:1.0
@@ -35,8 +45,6 @@ spec:
             operator: Exists
           - effect: NoExecute
             operator: Exists
-          nodeSelector:
-            "kubernetes.io/role": "master"
           volumes:
             - hostPath:
                 path: /etc/etcd/ssl/

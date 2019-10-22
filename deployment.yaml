@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: debug
+  labels:
+    app: debug
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: debug
+  template:
+    metadata:
+      labels:
+        app: debug
+    spec:
+      containers:
+      - name: debug
+        image: zhanglianx111/debug:latest
+        ports:
+        - containerPort: 8080
+        resources:
+          requests:
+            cpu: 100m
+            memory: 50Mi
+          limits:
+            cpu: 100m
+            memory: 50Mi
+        volumeMounts:
+        - mountPath: /etcd-backup
+          name: etcd-backup
+      nodeSelector:
+        "kubernetes.io/hostname": "cn-hangzhou.i-bp1j39cr29g1fhi1qn4l"
+      volumes:
+      - persistentVolumeClaim:
+          claimName: etcd-backup
+        name: etcd-backup
